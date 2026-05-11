@@ -1,0 +1,20 @@
+[project]
+name = 'windows-post-init'
+version = '0.1.0'
+requires-python = '>=3.14'
+
+[tool.basedpyright]
+strict = ['main.py']
+typeCheckingMode = 'off'
+
+[tool.pixi.workspace]
+channels = ['conda-forge', 'https://prefix.dev/github-releases']
+platforms = ['win-64']
+
+[tool.pixi.dependencies]
+minijinja = { channel = 'https://prefix.dev/github-releases' }
+pydantic = '>=2.12.1'
+pyyaml = '>=6.0.3'
+
+[tool.pixi.tasks]
+build = 'python main.py'

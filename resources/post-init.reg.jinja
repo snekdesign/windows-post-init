@@ -1,0 +1,35 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Control Panel\Desktop]
+"WallPaper"=""
+
+[HKEY_CURRENT_USER\Software\Microsoft\Edge\SmartScreenPuaEnabled]
+@=dword:00000001
+
+[HKEY_CURRENT_USER\Software\Microsoft\InputMethod\Settings\CHS]
+"English Switch Key"=dword:00000002
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\Wallpapers]
+"BackgroundType"=dword:00000001
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Search]
+"SearchboxTaskbarMode"=dword:00000000
+"SearchboxTaskbarModeCache"=dword:00000000
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\SearchSettings]
+"IsAADCloudSearchEnabled"=dword:00000000
+"IsDeviceSearchHistoryEnabled"=dword:00000000
+"IsDynamicSearchBoxEnabled"=dword:00000000
+"IsMSACloudSearchEnabled"=dword:00000000
+"SafeSearchMode"=dword:00000000
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize]
+"SystemUsesLightTheme"=dword:00000000
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon]
+"AutoAdminLogon"="1"
+"DefaultPassword"="1"
+"DefaultUserName"="{{ Name }}"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\UserARSO\{{ SID }}]
+"OptOut"=dword:00000001

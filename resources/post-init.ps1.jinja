@@ -1,0 +1,67 @@
+#Requires -Version 7.5
+#Requires -RunAsAdministrator
+
+$ErrorActionPreference = 'Stop'
+
+Import-Module Dism -UseWindowsPowerShell -WarningAction Ignore
+
+if (Get-Command Get-BitLockerVolume -ErrorAction Ignore) {
+    Get-BitLockerVolume |
+        Disable-BitLocker -ErrorAction Ignore
+}
+
+Stop-Service WSearch -Force
+Set-Service WSearch -StartupType Disabled
+
+mkdir -ErrorAction 'Continue' -Path @(
+{%- for path in mkdir %}
+    {{ path }}
+{%- endfor %}
+)
+{% for item in new_item %}
+New-Item `
+    -ItemType {{ item.ItemType }} `
+    -Path {{ item.Path }} `
+    -Value {{ item.Value }} `
+    -ErrorAction 'Continue'
+{%- endfor %}
+
+Push-Location $PSScriptRoot\resources
+
+if (Get-WindowsEdition -Online | Where-Object Edition -eq ServerStandard) {
+    secedit.exe /configure /db temp.db /cfg secedit.inf /log secedit.log
+    Get-Content secedit.log
+    Remove-Item temp.db, temp.jfm, secedit.log
+{% for port in [3000, 8000] %}
+    New-NetFirewallRule `
+        -DisplayName 'General HTTP Service' `
+        -Description 'General HTTP Service' `
+        -LocalPort {{ port }} `
+        -Protocol TCP `
+        -RemotePort 49152-65535
+{%- endfor %}
+    New-NetFirewallRule `
+        -DisplayName 'Logi Options+ Agent' `
+        -Description 'Logi Options+ Agent' `
+        -Program 'C:\Program Files\LogiOptionsPlus\logioptionsplus_agent.exe'
+}
+
+Get-LocalUser $Env:USERNAME |
+    ConvertTo-Json -Depth 0 -WarningAction Ignore |
+    .\minijinja-cli.exe -f json post-init.reg.jinja - |
+    Set-Content post-init.reg -Encoding unicode
+reg.exe import post-init.reg
+
+Remove-Item post-init.reg
+Pop-Location
+
+$pw = ConvertTo-SecureString '1' -AsPlainText -Force
+Set-LocalUser -Name $Env:USERNAME -Password $pw
+
+New-SmbShare public D:\Public -FullAccess $(whoami)
+
+winget.exe source remove winget
+# winget.exe source add winget https://mirrors.cernet.edu.cn/winget-source
+
+intl.cpl
+# colorcpl.exe

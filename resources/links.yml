@@ -1,0 +1,17 @@
+$USERPROFILE:
+  .config:
+    git: D:\.config\git  # https://git-scm.com/docs/git-config
+  .ssh: D:\.ssh  # https://man.openbsd.org/ssh_config
+  # .streamlit: D:\.streamlit  # https://docs.streamlit.io/develop/concepts/configuration/options
+  .vscode-oss: D:\.vscode-oss
+  .wslconfig: D:\.wslconfig  # https://learn.microsoft.com/en-us/windows/wsl/wsl-config
+  AppData:
+    Local:
+      pooch\pooch\Cache: D:\.cache\pooch  # https://www.fatiando.org/pooch/latest/api/generated/pooch.os_cache.html
+      pyapp:
+        cache: D:\.cache\pyapp  # https://docs.rs/directories/latest/directories/struct.ProjectDirs.html#method.cache_dir
+        data: D:\.local\share\pyapp  # https://docs.rs/directories/latest/directories/struct.ProjectDirs.html#method.data_local_dir
+      Zed: D:\.local\share\zed  # https://docs.rs/dirs/latest/dirs/fn.data_local_dir.html
+    Roaming:
+      VSCodium: D:\.vscode-oss\user-data
+      Zed: D:\.config\zed  # https://docs.rs/dirs/latest/dirs/fn.config_dir.html
