@@ -3,9 +3,14 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import pathlib
+import time
+from typing import Any
 import zipfile
 
+import pooch  # pyright: ignore[reportMissingTypeStubs]
+from pooch import HTTPDownloader  # pyright: ignore[reportMissingTypeStubs]
 import pydantic
 import yaml
 
@@ -21,6 +26,16 @@ def main() -> None:
     resources = root / 'resources'
     script = _powershell(minijinja_cli, resources)
 
+    pooch.hashes.ALGORITHMS_AVAILABLE['dummy'] = _DummyHash
+    try:
+        options = pooch.retrieve(  # pyright: ignore[ reportUnknownMemberType]
+            'https://download.logitech.com.cn/web/ftp/pub/techsupport/optionsplus/logioptionsplus_installer_offline.exe',
+            'dummy:hash',
+            downloader=_downloader,
+        )
+    except _NotModified as e:
+        options = e.args[0]
+
     with zipfile.ZipFile(
         root / 'post-init.zip',
         'w',
@@ -30,8 +45,51 @@ def main() -> None:
     ) as f:
         f.writestr('post-init.ps1', script)
         f.write(minijinja_cli, 'resources/minijinja-cli.exe')
+        f.write(
+            options,
+            'resources/logioptionsplus_installer_offline.exe',
+            compresslevel=zipfile.ZIP_STORED,
+        )
         for name in 'post-init.reg.jinja', 'secedit.inf':
             f.write(resources / name, 'resources/' + name)
+
+
+def _downloader(
+    fname: str,
+    action: str | os.PathLike[Any] | None,
+    pooch: pooch.Pooch | None,
+    *,
+    check_only: bool | None = None,
+) -> object:
+    filename = sys._getframe(1).f_locals['fname']  # pyright: ignore[reportPrivateUsage]
+    try:
+        mtime = os.path.getmtime(filename)
+    except FileNotFoundError:
+        downloader = HTTPDownloader()
+    else:
+        headers = {
+            'If-Modified-Since': time.strftime(
+                '%a, %d %b %Y %H:%M:%S GMT',
+                time.gmtime(mtime),
+            ),
+        }
+        downloader = HTTPDownloader(headers=headers)
+    return downloader(fname, action, pooch, check_only=bool(check_only))
+
+
+class _DummyHash:
+    def __init__(self) -> None:
+        self._empty = True
+
+    def update(self, _: bytes) -> None:
+        self._empty = False
+
+    def hexdigest(self) -> str:
+        if sys._getframe(2).f_locals['source']:  # pyright: ignore[reportPrivateUsage]
+            if self._empty:
+                raise _NotModified(sys._getframe(3).f_locals['fname'])  # pyright: ignore[reportPrivateUsage]
+            return 'hash'
+        return ''
 
 
 def _links(cfg: object) -> Iterator[tuple[str, str]]:
@@ -42,6 +100,10 @@ def _links(cfg: object) -> Iterator[tuple[str, str]]:
         else:
             for k2, v2 in _links(v):
                 yield os.path.join(k, k2), v2
+
+
+class _NotModified(Exception):
+    pass
 
 
 def _powershell(

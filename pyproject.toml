@@ -13,6 +13,7 @@ platforms = ['win-64']
 
 [tool.pixi.dependencies]
 minijinja = { channel = 'https://prefix.dev/github-releases' }
+pooch = '>=1.9.0'
 pydantic = '>=2.12.1'
 pyyaml = '>=6.0.3'
 

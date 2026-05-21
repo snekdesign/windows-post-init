@@ -51,8 +51,21 @@ Get-LocalUser $Env:USERNAME |
     .\minijinja-cli.exe -f json post-init.reg.jinja - |
     Set-Content post-init.reg -Encoding unicode
 reg.exe import post-init.reg
-
 Remove-Item post-init.reg
+
+.\logioptionsplus_installer_offline.exe `
+    /quiet `
+    /analytics no `
+    /flow yes `
+    /sso no `
+    /update no `
+    /dfu yes `
+    /backlight yes `
+    /logivoice no `
+    /aipromptbuilder no `
+    /device-recommendation no `
+    /smartactions no `
+    /actions-ring no
 Pop-Location
 
 $pw = ConvertTo-SecureString '1' -AsPlainText -Force
