@@ -13,6 +13,12 @@ if (Get-Command Get-BitLockerVolume -ErrorAction Ignore) {
 Stop-Service WSearch -Force
 Set-Service WSearch -StartupType Disabled
 
+# https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables#psnativecommanduseerroractionpreference
+& {
+    $PSNativeCommandUseErrorActionPreference = $false
+    fsutil devdrv trust D:
+}
+
 mkdir -ErrorAction 'Continue' -Path @(
 {%- for path in mkdir %}
     {{ path }}
